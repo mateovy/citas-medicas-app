@@ -5,22 +5,24 @@ import { useRouter } from 'next/navigation';
 
 export default function AgendarCitaPage() {
   const router = useRouter();
+  
+  // 1. Eliminamos 'tipoCita' del estado del formulario
   const [formData, setFormData] = useState({
     fecha: '',
     hora: '',
-    tipoCita: '',
     especialidad: '',
     doctor: '',
     ubicacion: ''
   });
+
   const [appointmentData, setAppointmentData] = useState(null);
   const [availableFields, setAvailableFields] = useState({
-    especialidades: [],
     doctores: [],
     ubicaciones: ["Consultorio 101", "Consultorio 202"],
     horas: ["08:00", "09:00", "10:00", "14:00"]
   });
 
+  // Carga los datos de la API al iniciar
   useEffect(() => {
     fetch('/api/appointment-data')
       .then(res => res.json())
@@ -28,17 +30,16 @@ export default function AgendarCitaPage() {
       .catch(error => console.error("Error fetching appointment data:", error));
   }, []);
 
+  // 2. Simplificamos la lógica de 'handleChange'
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
 
-    if (name === 'tipoCita' && value) {
-      setFormData(prev => ({ ...prev, especialidad: '', doctor: '' }));
-      setAvailableFields(prev => ({ ...prev, especialidades: Object.keys(appointmentData[value]) }));
-    }
+    // Ahora la lógica depende directamente de 'especialidad'
     if (name === 'especialidad' && value) {
       setFormData(prev => ({ ...prev, doctor: '' }));
-      setAvailableFields(prev => ({ ...prev, doctores: appointmentData[formData.tipoCita][value] }));
+      // Buscamos los doctores en la nueva estructura de datos
+      setAvailableFields(prev => ({ ...prev, doctores: appointmentData[value] || [] }));
     }
   };
 
@@ -57,65 +58,38 @@ export default function AgendarCitaPage() {
     router.push('/dashboard');
   };
 
-  const isFormValid = Object.values(formData).every(field => field !== '');
+  // 3. La validación se ajusta automáticamente al no tener 'tipoCita'
+  const isFormValid = formData.fecha && formData.hora && formData.especialidad && formData.doctor && formData.ubicacion;
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900 bg-opacity-75">
       <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
         <h2 className="text-base font-semibold">Agendar Nueva Cita</h2>
-        <p className="text-sm text-gray-500 mb-6">Complete los datos para agendar su cita médica</p>
+        <p className="text-sm text-gray-500 mb-6">Complete los datos para agendar su exámen</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-semibold">Fecha</label>
-              <input type="date" name="fecha" value={formData.fecha} onChange={handleChange} className="w-full mt-1 p-1 bg-gray-100 rounded-xl border-none" required />
+              <input type="date" name="fecha" value={formData.fecha} onChange={handleChange} className="w-full mt-1 p-[7px] bg-gray-100 rounded-xl border-none" required />
             </div>
             <div>
               <label className="text-sm font-semibold">Hora</label>
-              {/* Contenedor relativo para posicionar el ícono */}
               <div className="relative w-full mt-1">
-                <select
-                  name="hora"
-                  value={formData.hora}
-                  onChange={handleChange}
-                  // Clases para ocultar la flecha y añadir padding
-                  className="w-full p-2 pr-10 bg-gray-100 rounded-xl border-none appearance-none"
-                  required
-                >
+                <select name="hora" value={formData.hora} onChange={handleChange} className="w-full p-2 pr-10 bg-gray-100 rounded-xl border-none appearance-none" required >
                   <option value="">--:-- --</option>
                   {availableFields.horas.map(h => <option key={h} value={h}>{h}</option>)}
                 </select>
-
-                {/* Ícono personalizado de flecha */}
                 <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
                   <ChevronDown className="h-5 w-5 text-black" />
                 </div>
               </div>
             </div>
           </div>
+          
+          {/* 4. Hemos eliminado completamente el campo 'Tipo de Cita' de aquí */}
 
-          {/* Campo Tipo de Cita */}
-          <div>
-            <label className="text-sm font-semibold">Tipo de Cita</label>
-            <div className="relative w-full mt-1">
-              <select
-                name="tipoCita"
-                value={formData.tipoCita}
-                onChange={handleChange}
-                className="w-full p-2 pr-10 bg-gray-100 rounded-xl border-none appearance-none"
-                required
-              >
-                <option value="">Seleccione el tipo de cita</option>
-                {appointmentData && Object.keys(appointmentData).map(tipo => <option key={tipo} value={tipo}>{tipo}</option>)}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
-                <ChevronDown className="h-5 w-5 text-black" />
-              </div>
-            </div>
-          </div>
-
-          {/* Campo Especialidad */}
+          {/* Campo Especialidad (ahora es el primer selector) */}
           <div>
             <label className="text-sm font-semibold">Especialidad</label>
             <div className="relative w-full mt-1">
@@ -123,12 +97,13 @@ export default function AgendarCitaPage() {
                 name="especialidad"
                 value={formData.especialidad}
                 onChange={handleChange}
-                disabled={!formData.tipoCita}
-                className="w-full p-2 pr-10 bg-gray-100 rounded-xl border-none appearance-none disabled:bg-gray-200"
+                // Ya no necesita estar deshabilitado al inicio
+                className="w-full p-2 pr-10 bg-gray-100 rounded-xl border-none appearance-none"
                 required
               >
                 <option value="">Seleccione la especialidad</option>
-                {availableFields.especialidades.map(esp => <option key={esp} value={esp}>{esp}</option>)}
+                {/* Cargamos las especialidades directamente */}
+                {appointmentData && Object.keys(appointmentData).map(esp => <option key={esp} value={esp}>{esp}</option>)}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
                 <ChevronDown className="h-5 w-5 text-black" />
@@ -140,14 +115,7 @@ export default function AgendarCitaPage() {
           <div>
             <label className="text-sm font-semibold">Doctor</label>
             <div className="relative w-full mt-1">
-              <select
-                name="doctor"
-                value={formData.doctor}
-                onChange={handleChange}
-                disabled={!formData.especialidad}
-                className="w-full p-2 pr-10 bg-gray-100 rounded-xl border-none appearance-none disabled:bg-gray-200"
-                required
-              >
+              <select name="doctor" value={formData.doctor} onChange={handleChange} disabled={!formData.especialidad} className="w-full p-2 pr-10 bg-gray-100 rounded-xl border-none appearance-none disabled:bg-gray-200" required>
                 <option value="">Seleccione el doctor</option>
                 {availableFields.doctores.map(doc => <option key={doc} value={doc}>{doc}</option>)}
               </select>
@@ -161,14 +129,7 @@ export default function AgendarCitaPage() {
           <div>
             <label className="text-sm font-semibold">Ubicación</label>
             <div className="relative w-full mt-1">
-              <select
-                name="ubicacion"
-                value={formData.ubicacion}
-                onChange={handleChange}
-                disabled={!formData.doctor}
-                className="w-full p-2 pr-10 bg-gray-100 rounded-xl border-none appearance-none disabled:bg-gray-200"
-                required
-              >
+              <select name="ubicacion" value={formData.ubicacion} onChange={handleChange} disabled={!formData.doctor} className="w-full p-2 pr-10 bg-gray-100 rounded-xl border-none appearance-none disabled:bg-gray-200" required>
                 <option value="">Seleccione la ubicación</option>
                 {availableFields.ubicaciones.map(ubi => <option key={ubi} value={ubi}>{ubi}</option>)}
               </select>
