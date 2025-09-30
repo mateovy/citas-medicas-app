@@ -1,14 +1,10 @@
-// src/app/dashboard/page.js
 'use client';
 
-// 1. Importa 'useCallback' de React
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-// Importamos los íconos de Lucide React
 import { Calendar, UserCheck, Clock, Plus, Pencil, Trash2, CalendarDays, MapPin, User, LogOut, SquarePen } from 'lucide-react';
 
-// --- Tus componentes StatCard y CitaCard (sin cambios) ---
 const StatCard = ({ title, value, icon: Icon, color = 'blue' }) => {
     const colorVariants = { blue: 'text-blue-500', green: 'text-green-500', gray: 'text-gray-400' };
     const iconColorClass = colorVariants[color] || 'text-gray-500';
@@ -50,30 +46,24 @@ const CitaCard = ({ cita, onEdit, onDelete }) => (
     </div>
 );
 
-
-// --- PÁGINA PRINCIPAL DEL DASHBOARD ---
-
 export default function DashboardPage() {
     const [usuario, setUsuario] = useState(null);
     const [citas, setCitas] = useState([]);
     const [tiempoSesion, setTiempoSesion] = useState('00:00');
     const router = useRouter();
 
-    // 2. Definimos el tiempo de expiración en milisegundos (15 minutos)
     const SESSION_TIMEOUT_MS = 15 * 60 * 1000;
 
-    // 3. Optimizamos la función de cierre de sesión con useCallback
     const handleCerrarSesion = useCallback(() => {
         localStorage.clear();
         router.push('/');
-        alert("Tu sesión ha expirado por inactividad."); // Avisamos al usuario
+        alert("Tu sesión ha expirado por inactividad.");
     }, [router]);
 
     useEffect(() => {
         const usuarioGuardado = JSON.parse(localStorage.getItem('usuario'));
         const inicioSesion = parseInt(localStorage.getItem('inicioSesion'), 10);
 
-        // Si no hay datos de sesión, redirige al login
         if (!usuarioGuardado || !inicioSesion) {
             router.push('/');
             return;
@@ -83,18 +73,14 @@ export default function DashboardPage() {
         const citasGuardadas = JSON.parse(localStorage.getItem('citas')) || [];
         setCitas(citasGuardadas);
         
-        // 4. Creamos el intervalo que se ejecutará cada segundo
         const intervalId = setInterval(() => {
             const ahora = Date.now();
             const tiempoTranscurrido = ahora - inicioSesion;
 
-            // 5. LÓGICA DE CIERRE AUTOMÁTICO
-            // Si el tiempo transcurrido supera el límite, cerramos la sesión
             if (tiempoTranscurrido > SESSION_TIMEOUT_MS) {
-                clearInterval(intervalId); // Limpiamos el intervalo
-                handleCerrarSesion();      // Y cerramos la sesión
+                clearInterval(intervalId);
+                handleCerrarSesion();
             } else {
-                // Si no, solo actualizamos el reloj
                 const diffSeconds = Math.floor(tiempoTranscurrido / 1000);
                 const minutos = String(Math.floor(diffSeconds / 60)).padStart(2, '0');
                 const segundos = String(diffSeconds % 60).padStart(2, '0');
@@ -102,16 +88,14 @@ export default function DashboardPage() {
             }
         }, 1000);
 
-        // Limpieza del intervalo cuando el componente se desmonta
         return () => clearInterval(intervalId);
 
-    }, [router, handleCerrarSesion, SESSION_TIMEOUT_MS]); // Añadimos las dependencias
+    }, [router, handleCerrarSesion, SESSION_TIMEOUT_MS]);
 
     const citasProgramadas = citas.filter(c => c.estado === 'Programada').length;
     const citasCompletadas = citas.filter(c => c.estado === 'Completada').length;
     const totalCitas = citas.length;
 
-    // Si el usuario aún no ha cargado, muestra un mensaje
     if (!usuario) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -120,7 +104,6 @@ export default function DashboardPage() {
         );
     }
     
-    // El resto de tu componente JSX (sin cambios)
     return (
         <div className="min-h-screen bg-[#F7F8FA]">
             <header className="bg-white border-b border-gray-200">

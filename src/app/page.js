@@ -7,14 +7,14 @@ import { Calendar, FileText, User, AlertCircle } from 'lucide-react';
 export default function LoginPage() {
   const [documento, setDocumento] = useState('');
   const [nombre, setNombre] = useState('');
-  const [error, setError] = useState(''); // Estado para el mensaje de error
-  const [isLoading, setIsLoading] = useState(false); // Estado para la carga
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(''); // Limpiamos errores previos
+    setError('');
 
     if (!documento || !nombre) {
       alert('⚠️ Por favor complete todos los campos');
@@ -22,7 +22,6 @@ export default function LoginPage() {
       return;
     }
     
-    // 1. Llamamos a nuestra nueva API de login
     try {
         const res = await fetch('/api/auth/login', {
             method: 'POST',
@@ -32,22 +31,19 @@ export default function LoginPage() {
 
         const data = await res.json();
 
-        // 2. Si la respuesta es exitosa (status 200-299)
         if (res.ok) {
-            // Guardamos los datos y redirigimos
             localStorage.setItem('usuario', JSON.stringify(data.user));
             localStorage.setItem('inicioSesion', Date.now());
             localStorage.setItem('citas', JSON.stringify([]));
             router.push('/dashboard');
         } else {
-            // 3. Si hay un error, mostramos el mensaje de la API
             setError(data.message || 'Ocurrió un error');
         }
     } catch (err) {
         setError('No se pudo conectar al servidor. Intente de nuevo.');
         console.error(err);
     } finally {
-        setIsLoading(false); // Detenemos la carga
+        setIsLoading(false);
     }
   };
 
@@ -64,7 +60,6 @@ export default function LoginPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-3 text-left">
-          {/* Aquí mostramos el mensaje de error si existe */}
           {error && (
             <div className="flex items-center gap-2 p-3 text-sm text-red-700 bg-red-100 rounded-lg">
                 <AlertCircle size={20} />
@@ -112,7 +107,7 @@ export default function LoginPage() {
           </div>
           <button
             type="submit"
-            disabled={isLoading} // Deshabilitamos el botón mientras carga
+            disabled={isLoading}
             className="w-full py-[6px] font-bold text-white bg-black rounded-xl hover:bg-gray-800 transition-colors disabled:bg-gray-400"
           >
             {isLoading ? 'Verificando...' : 'Iniciar Sesión'}
