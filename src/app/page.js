@@ -2,12 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Calendar, FileText, User } from 'lucide-react';
 
-const CalendarIcon = () => (
-  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-  </svg>
-);
 
 export default function LoginPage() {
   const [documento, setDocumento] = useState('');
@@ -23,62 +19,69 @@ export default function LoginPage() {
 
     localStorage.setItem('usuario', JSON.stringify({ nombre, documento }));
     localStorage.setItem('inicioSesion', Date.now());
-    localStorage.setItem('citas', JSON.stringify([])); 
+    localStorage.setItem('citas', JSON.stringify([]));
 
     router.push('/dashboard');
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#fdeeee]">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg text-center">
+      <div className="w-full max-w-md p-8 space-y-0 bg-white rounded-xl shadow-lg text-center">
         {/* Icono */}
-        <div className="mx-auto flex items-center justify-center w-16 h-16 bg-blue-500 rounded-full">
-          <CalendarIcon />
+        <div className="mx-auto flex items-center justify-center w-20 h-20 mb-6 bg-[#4848F7] rounded-full">
+          <Calendar className='w-[48px] h-[48px] text-white' />
         </div>
 
         {/* Títulos */}
-        <h2 className="text-2xl font-bold text-gray-800">Módulo de Citas Médicas</h2>
-        <p className="text-sm text-gray-600">
+        <h2 className="text-base font-semibold text-gray-800 mb-2">Módulo de Citas Médicas</h2>
+        <p className="text-base font-medium font-[#Inter] text-[#808080] pb-5">
           Ingrese sus datos para acceder al sistema de citas de diagnóstico
         </p>
 
         {/* Formulario */}
-        <form onSubmit={handleSubmit} className="space-y-4 text-left">
+        <form onSubmit={handleSubmit} className="space-y-3 text-left">
           <div>
-            <label htmlFor="documento" className="text-sm font-bold text-gray-700">
+            <label htmlFor="documento" className="text-sm font-semibold text-black">
               Documento de Identidad
             </label>
             <div className="relative">
+              <FileText
+                className="absolute left-2 top-[55%] -translate-y-1/2 h-5 w-5 text-gray-500"
+              />
               <input
                 id="documento"
                 type="text"
                 value={documento}
                 onChange={(e) => setDocumento(e.target.value)}
                 placeholder="Ingrese su documento de identidad"
-                className="w-full px-4 py-2 mt-1 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-9 pr-4 py-[6px] mt-1 text-gray-700 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-[#808080] placeholder:font-medium"
                 required
               />
             </div>
           </div>
           <div>
-            <label htmlFor="nombre" className="text-sm font-bold text-gray-700">
+            <label htmlFor="nombre" className="text-sm font-semibold text-black">
               Nombre Completo
             </label>
-            <div className="relative">
+            <div className="relative mb-1">
+              <User
+                className="absolute left-2 top-[55%] -translate-y-1/2 h-5 w-5 text-[#808080]"
+              />
+
               <input
                 id="nombre"
                 type="text"
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
                 placeholder="Ingrese su nombre completo"
-                className="w-full px-4 py-2 mt-1 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-9 pr-4 py-[6px] mt-1 text-gray-700 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-[#808080] placeholder:font-medium"
                 required
               />
             </div>
           </div>
           <button
             type="submit"
-            className="w-full py-2 font-bold text-white bg-black rounded-lg hover:bg-gray-800 transition-colors"
+            className="w-full py-[6px] font-bold text-white bg-black rounded-xl hover:bg-gray-800 transition-colors"
           >
             Iniciar Sesión
           </button>
