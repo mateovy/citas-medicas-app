@@ -25,7 +25,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#fdeeee]">
+    <div className="flex items-center justify-center min-h-screen bg-[#FFEFEF]">
       <div className="w-full max-w-md p-8 space-y-0 bg-white rounded-xl shadow-lg text-center">
         {/* Icono */}
         <div className="mx-auto flex items-center justify-center w-20 h-20 mb-6 bg-[#4848F7] rounded-full">
