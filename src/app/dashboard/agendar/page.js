@@ -2,6 +2,8 @@
 import { ChevronDown } from "lucide-react";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 
 export default function AgendarCitaPage() {
   const router = useRouter();
@@ -13,7 +15,10 @@ export default function AgendarCitaPage() {
     doctor: '',
     ubicacion: ''
   });
+
   const [appointmentData, setAppointmentData] = useState(null);
+  const [showCalendar, setShowCalendar] = useState(false);
+
   const [availableFields, setAvailableFields] = useState({
     especialidades: [],
     doctores: [],
@@ -43,78 +48,115 @@ export default function AgendarCitaPage() {
   };
 
   const handleSubmit = (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const nuevaCita = {
-    ...formData,
-    estado: 'Programada'
+    const nuevaCita = {
+      ...formData,
+      estado: 'Programada'
+    };
+
+    let citas = JSON.parse(localStorage.getItem('citas')) || [];
+
+    const existe = citas.some(
+      (cita) =>
+        cita.doctor === nuevaCita.doctor &&
+        cita.fecha === nuevaCita.fecha &&
+        cita.hora === nuevaCita.hora
+    );
+
+    if (existe) {
+      alert('⚠️ Ese doctor ya tiene una cita en ese horario.');
+      return;
+    }
+
+    citas.push(nuevaCita);
+    localStorage.setItem('citas', JSON.stringify(citas));
+
+    alert('✅ Cita agendada con éxito.');
+    router.push('/dashboard');
   };
 
-  // Obtener citas ya guardadas
-  let citas = JSON.parse(localStorage.getItem('citas')) || [];
-
-  // 🔹 Validar si ya existe una cita con el mismo doctor, fecha y hora
-  const existe = citas.some(
-    (cita) =>
-      cita.doctor === nuevaCita.doctor &&
-      cita.fecha === nuevaCita.fecha &&
-      cita.hora === nuevaCita.hora
-  );
-
-  if (existe) {
-    alert('⚠️ Ese doctor ya tiene una cita en ese horario.');
-    return; //  No guarda la cita si está repetida
-  }
-
-  // Si no existe → guardar la nueva cita
-  citas.push(nuevaCita);
-  localStorage.setItem('citas', JSON.stringify(citas));
-
-  alert('✅ Cita agendada con éxito.');
-  router.push('/dashboard');
-};
-
-
   const isFormValid = Object.values(formData).every(field => field !== '');
+
+  // 📅 Fechas disponibles (ejemplo: lunes a viernes, 2 meses desde hoy)
+  const getDoctorDisponibilidad = (date) => {
+    if (!formData.doctor) return false;
+    const day = date.getDay();
+    return day !== 0 && day !== 6; // lunes-viernes
+  };
+
+  const today = new Date();
+  const maxDate = new Date();
+  maxDate.setMonth(today.getMonth() + 2);
+
+  const handleDateChange = (date) => {
+    const fechaStr = date.toISOString().split("T")[0];
+    setFormData(prev => ({ ...prev, fecha: fechaStr, hora: '' }));
+    setShowCalendar(false);
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-900 bg-opacity-75">
       <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
         <h2 className="text-base font-semibold">Agendar Nueva Cita</h2>
-        <p className="text-sm text-gray-500 mb-6">Complete los datos para agendar su cita médica</p>
+        <p className="text-sm text-gray-500 mb-6">
+          Complete los datos para agendar su cita médica
+        </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-semibold">Fecha</label>
-              <input type="date" name="fecha" value={formData.fecha} onChange={handleChange} className="w-full mt-1 p-1 bg-gray-100 rounded-xl border-none" min={new Date().toISOString().split("T")[0]} required/>
+          {/* 📅 Campo Fecha con calendario plegable */}
+          <div>
+            <label className="text-sm font-semibold">Fecha</label>
+            <div className="relative w-full mt-1">
+              <button
+                type="button"
+                onClick={() => setShowCalendar(!showCalendar)}
+                disabled={!formData.doctor}
+                className="w-full p-2 pr-10 bg-gray-100 rounded-xl border-none text-left disabled:bg-gray-200"
+              >
+                {formData.fecha || "Seleccione una fecha"}
+              </button>
+              <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                <ChevronDown className="h-5 w-5 text-black" />
+              </div>
             </div>
-         
-            <div>
-              <label className="text-sm font-semibold">Hora</label>
-              {/* Contenedor relativo para posicionar el ícono */}
-              <div className="relative w-full mt-1">
-                <select
-                  name="hora"
-                  value={formData.hora}
-                  onChange={handleChange}
-                  // Clases para ocultar la flecha y añadir padding
-                  className="w-full p-2 pr-10 bg-gray-100 rounded-xl border-none appearance-none"
-                  required
-                >
-                  <option value="">--:-- --</option>
-                  {availableFields.horas.map(h => <option key={h} value={h}>{h}</option>)}
-                </select>
 
-                {/* Ícono personalizado de flecha */}
-                <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
-                  <ChevronDown className="h-5 w-5 text-black" />
-                </div>
+            {showCalendar && (
+              <div className="mt-2">
+                <Calendar
+                  onChange={handleDateChange}
+                  value={formData.fecha ? new Date(formData.fecha) : null}
+                  minDate={today}
+                  maxDate={maxDate}
+                  tileDisabled={({ date }) => !getDoctorDisponibilidad(date)}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* ⏰ Campo Hora */}
+          <div>
+            <label className="text-sm font-semibold">Hora</label>
+            <div className="relative w-full mt-1">
+              <select
+                name="hora"
+                value={formData.hora}
+                onChange={handleChange}
+                className="w-full p-2 pr-10 bg-gray-100 rounded-xl border-none appearance-none"
+                required
+              >
+                <option value="">--:-- --</option>
+                {availableFields.horas.map(h => (
+                  <option key={h} value={h}>{h}</option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                <ChevronDown className="h-5 w-5 text-black" />
               </div>
             </div>
           </div>
 
-          {/* Campo Tipo de Cita */}
+          {/* Tipo de Cita */}
           <div>
             <label className="text-sm font-semibold">Tipo de Cita</label>
             <div className="relative w-full mt-1">
@@ -126,7 +168,9 @@ export default function AgendarCitaPage() {
                 required
               >
                 <option value="">Seleccione el tipo de cita</option>
-                {appointmentData && Object.keys(appointmentData).map(tipo => <option key={tipo} value={tipo}>{tipo}</option>)}
+                {appointmentData && Object.keys(appointmentData).map(tipo => (
+                  <option key={tipo} value={tipo}>{tipo}</option>
+                ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
                 <ChevronDown className="h-5 w-5 text-black" />
@@ -134,7 +178,7 @@ export default function AgendarCitaPage() {
             </div>
           </div>
 
-          {/* Campo Especialidad */}
+          {/* Especialidad */}
           <div>
             <label className="text-sm font-semibold">Especialidad</label>
             <div className="relative w-full mt-1">
@@ -147,7 +191,9 @@ export default function AgendarCitaPage() {
                 required
               >
                 <option value="">Seleccione la especialidad</option>
-                {availableFields.especialidades.map(esp => <option key={esp} value={esp}>{esp}</option>)}
+                {availableFields.especialidades.map(esp => (
+                  <option key={esp} value={esp}>{esp}</option>
+                ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
                 <ChevronDown className="h-5 w-5 text-black" />
@@ -155,7 +201,7 @@ export default function AgendarCitaPage() {
             </div>
           </div>
 
-          {/* Campo Doctor */}
+          {/* Doctor */}
           <div>
             <label className="text-sm font-semibold">Doctor</label>
             <div className="relative w-full mt-1">
@@ -168,7 +214,9 @@ export default function AgendarCitaPage() {
                 required
               >
                 <option value="">Seleccione el doctor</option>
-                {availableFields.doctores.map(doc => <option key={doc} value={doc}>{doc}</option>)}
+                {availableFields.doctores.map(doc => (
+                  <option key={doc} value={doc}>{doc}</option>
+                ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
                 <ChevronDown className="h-5 w-5 text-black" />
@@ -176,7 +224,7 @@ export default function AgendarCitaPage() {
             </div>
           </div>
 
-          {/* Campo Ubicación */}
+          {/* Ubicación */}
           <div>
             <label className="text-sm font-semibold">Ubicación</label>
             <div className="relative w-full mt-1">
@@ -189,7 +237,9 @@ export default function AgendarCitaPage() {
                 required
               >
                 <option value="">Seleccione la ubicación</option>
-                {availableFields.ubicaciones.map(ubi => <option key={ubi} value={ubi}>{ubi}</option>)}
+                {availableFields.ubicaciones.map(ubi => (
+                  <option key={ubi} value={ubi}>{ubi}</option>
+                ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
                 <ChevronDown className="h-5 w-5 text-black" />
@@ -197,11 +247,20 @@ export default function AgendarCitaPage() {
             </div>
           </div>
 
+          {/* Botones */}
           <div className="flex gap-4 pt-4">
-            <button type="button" onClick={() => router.back()} className="flex-1 py-2 px-4 border border-gray-200 rounded-xl text-sm font-medium hover:bg-gray-100">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="flex-1 py-2 px-4 border border-gray-200 rounded-xl text-sm font-medium hover:bg-gray-100"
+            >
               Cancelar
             </button>
-            <button type="submit" disabled={!isFormValid} className="flex-1 py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-[#808080] hover:bg-black disabled:bg-gray-400 disabled:cursor-not-allowed">
+            <button
+              type="submit"
+              disabled={!isFormValid}
+              className="flex-1 py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-[#808080] hover:bg-black disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
               Agendar Cita
             </button>
           </div>
@@ -210,3 +269,4 @@ export default function AgendarCitaPage() {
     </div>
   );
 }
+
