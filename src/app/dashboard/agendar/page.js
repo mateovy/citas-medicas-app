@@ -9,9 +9,9 @@ import { useRouter } from 'next/navigation';
 
 export default function AgendarCitaPage() {
   const router = useRouter();
-  
+
   const [formData, setFormData] = useState({
-    fecha: null, 
+    fecha: null,
     hora: '',
     especialidad: '',
     doctor: '',
@@ -22,8 +22,10 @@ export default function AgendarCitaPage() {
   const [availableFields, setAvailableFields] = useState({
     doctores: [],
     ubicaciones: ["Consultorio 101", "Consultorio 102", "Consultorio 201", "Consultorio 202"],
-    horas: ["06:00", "08:00", "10:00", "14:00" , "16:00"]
+    horas: ["06:00", "08:00", "10:00", "14:00", "16:00"]
   });
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
 
   useEffect(() => {
     fetch('/api/appointment-data')
@@ -31,7 +33,7 @@ export default function AgendarCitaPage() {
       .then(data => setAppointmentData(data))
       .catch(error => console.error("Error fetching appointment data:", error));
   }, []);
-  
+
   const handleDateChange = (date) => {
     setFormData(prev => ({ ...prev, fecha: date }));
   };
@@ -47,7 +49,7 @@ export default function AgendarCitaPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     const nuevaCita = {
       ...formData,
       fecha: formData.fecha.toISOString().split("T")[0],
@@ -61,12 +63,12 @@ export default function AgendarCitaPage() {
         cita.fecha === nuevaCita.fecha &&
         cita.hora === nuevaCita.hora
     );
-    
+
     if (existe) {
       alert('⚠️ Ya existe una cita para ese exámen en el horario seleccionado.');
       return;
     }
-    
+
     citas.push(nuevaCita);
     localStorage.setItem('citas', JSON.stringify(citas));
     alert('✅ Cita agendada con éxito.');
@@ -95,7 +97,7 @@ export default function AgendarCitaPage() {
                 selected={formData.fecha}
                 onChange={handleDateChange}
                 filterDate={isWeekday}
-                minDate={new Date()}
+                minDate={tomorrow}
                 dateFormat="dd-MM-yyyy"
                 placeholderText="dd-mm-yy"
                 className="w-full mt-1 p-[7px] bg-gray-100 rounded-xl border-none"
@@ -115,7 +117,7 @@ export default function AgendarCitaPage() {
               </div>
             </div>
           </div>
-          
+
           <div>
             <label className="text-sm font-semibold">Especialidad</label>
             <div className="relative w-full mt-1">
