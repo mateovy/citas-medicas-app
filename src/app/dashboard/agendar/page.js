@@ -89,6 +89,30 @@ export default function AgendarCitaPage() {
         <p className="text-sm text-gray-500 mb-6">Complete los datos para agendar su examen</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="text-sm font-semibold">Especialidad</label>
+            <div className="relative w-full mt-1">
+              <select name="especialidad" value={formData.especialidad} onChange={handleChange} className="w-full p-2 pr-10 bg-gray-100 rounded-xl border-none appearance-none" required >
+                <option value="">Seleccione la especialidad</option>
+                {appointmentData && Object.keys(appointmentData).map(esp => <option key={esp} value={esp}>{esp}</option>)}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                <ChevronDown className="h-5 w-5 text-black" />
+              </div>
+            </div>
+          </div>
+          <div>
+            <label className="text-sm font-semibold">Doctor</label>
+            <div className="relative w-full mt-1">
+              <select name="doctor" value={formData.doctor} onChange={handleChange} disabled={!formData.especialidad} className="w-full p-2 pr-10 bg-gray-100 rounded-xl border-none appearance-none disabled:bg-gray-200" required>
+                <option value="">Seleccione el doctor</option>
+                {availableFields.doctores.map(doc => <option key={doc} value={doc}>{doc}</option>)}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
+                <ChevronDown className="h-5 w-5 text-black" />
+              </div>
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-semibold">Fecha</label>
@@ -114,31 +138,6 @@ export default function AgendarCitaPage() {
                 <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
                   <ChevronDown className="h-5 w-5 text-black" />
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-sm font-semibold">Especialidad</label>
-            <div className="relative w-full mt-1">
-              <select name="especialidad" value={formData.especialidad} onChange={handleChange} className="w-full p-2 pr-10 bg-gray-100 rounded-xl border-none appearance-none" required >
-                <option value="">Seleccione la especialidad</option>
-                {appointmentData && Object.keys(appointmentData).map(esp => <option key={esp} value={esp}>{esp}</option>)}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
-                <ChevronDown className="h-5 w-5 text-black" />
-              </div>
-            </div>
-          </div>
-          <div>
-            <label className="text-sm font-semibold">Doctor</label>
-            <div className="relative w-full mt-1">
-              <select name="doctor" value={formData.doctor} onChange={handleChange} disabled={!formData.especialidad} className="w-full p-2 pr-10 bg-gray-100 rounded-xl border-none appearance-none disabled:bg-gray-200" required>
-                <option value="">Seleccione el doctor</option>
-                {availableFields.doctores.map(doc => <option key={doc} value={doc}>{doc}</option>)}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
-                <ChevronDown className="h-5 w-5 text-black" />
               </div>
             </div>
           </div>
