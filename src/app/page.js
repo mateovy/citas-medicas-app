@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, FileText, User, AlertCircle } from 'lucide-react';
+import { Calendar, FileText, User, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const [documento, setDocumento] = useState('');
   const [nombre, setNombre] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // 👁 mostrar/ocultar
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -16,34 +18,34 @@ export default function LoginPage() {
     setIsLoading(true);
     setError('');
 
-    if (!documento || !nombre) {
+    if (!documento || !nombre || !password) {
       alert('⚠️ Por favor complete todos los campos');
       setIsLoading(false);
       return;
     }
-    
+
     try {
-        const res = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ documento, nombre }),
-        });
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documento, nombre, password }),
+      });
 
-        const data = await res.json();
+      const data = await res.json();
 
-        if (res.ok) {
-            localStorage.setItem('usuario', JSON.stringify(data.user));
-            localStorage.setItem('inicioSesion', Date.now());
-            localStorage.setItem('citas', JSON.stringify([]));
-            router.push('/dashboard');
-        } else {
-            setError(data.message || 'Ocurrió un error');
-        }
+      if (res.ok) {
+        localStorage.setItem('usuario', JSON.stringify(data.user));
+        localStorage.setItem('inicioSesion', Date.now());
+        localStorage.setItem('citas', JSON.stringify([]));
+        router.push('/dashboard');
+      } else {
+        setError(data.message || 'Ocurrió un error');
+      }
     } catch (err) {
-        setError('No se pudo conectar al servidor. Intente de nuevo.');
-        console.error(err);
+      setError('No se pudo conectar al servidor. Intente de nuevo.');
+      console.error(err);
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -62,19 +64,18 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-3 text-left">
           {error && (
             <div className="flex items-center gap-2 p-3 text-sm text-red-700 bg-red-100 rounded-lg">
-                <AlertCircle size={20} />
-                <span>{error}</span>
+              <AlertCircle size={20} />
+              <span>{error}</span>
             </div>
           )}
 
+          {/* Documento */}
           <div>
             <label htmlFor="documento" className="text-sm font-semibold text-black">
               Documento de Identidad
             </label>
             <div className="relative">
-              <FileText
-                className="absolute left-2 top-[55%] -translate-y-1/2 h-5 w-5 text-gray-500"
-              />
+              <FileText className="absolute left-2 top-[55%] -translate-y-1/2 h-5 w-5 text-gray-500" />
               <input
                 id="documento"
                 type="text"
@@ -86,25 +87,52 @@ export default function LoginPage() {
               />
             </div>
           </div>
+
+          {/* Nombre */}
           <div>
             <label htmlFor="nombre" className="text-sm font-semibold text-black">
               Nombre Completo
             </label>
             <div className="relative mb-1">
-              <User
-                className="absolute left-2 top-[55%] -translate-y-1/2 h-5 w-5 text-[#808080]"
-              />
+              <User className="absolute left-2 top-[55%] -translate-y-1/2 h-5 w-5 text-[#808080]" />
               <input
                 id="nombre"
                 type="text"
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
                 placeholder="Ingrese su nombre completo"
-                className="w-full pl-9 pr-4 py-[6px] mt-1 text-gray-700 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-[#808080] placeholder:font-medium"
+                className="w-full pl-9 pr-10 py-[6px] mt-1 text-gray-700 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-[#808080] placeholder:font-medium"
                 required
               />
             </div>
           </div>
+
+          {/* Contraseña */}
+          <div>
+            <label htmlFor="password" className="text-sm font-semibold text-black">
+              Contraseña
+            </label>
+            <div className="relative mb-1">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'} // 👁 alterna
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Ingrese su contraseña"
+                className="w-full pl-3 pr-10 py-[6px] mt-1 text-gray-700 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-[#808080] placeholder:font-medium"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-2 top-[55%] -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Botón */}
           <button
             type="submit"
             disabled={isLoading}
