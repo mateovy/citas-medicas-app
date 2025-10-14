@@ -8,7 +8,7 @@ export default function LoginPage() {
   const [documento, setDocumento] = useState('');
   const [nombre, setNombre] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // 👁 mostrar/ocultar
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -36,7 +36,6 @@ export default function LoginPage() {
       if (res.ok) {
         localStorage.setItem('usuario', JSON.stringify(data.user));
         localStorage.setItem('inicioSesion', Date.now());
-        localStorage.setItem('citas', JSON.stringify([]));
         router.push('/dashboard');
       } else {
         setError(data.message || 'Ocurrió un error');
@@ -69,7 +68,6 @@ export default function LoginPage() {
             </div>
           )}
 
-          {/* Documento */}
           <div>
             <label htmlFor="documento" className="text-sm font-semibold text-black">
               Documento de Identidad
@@ -88,7 +86,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Nombre */}
           <div>
             <label htmlFor="nombre" className="text-sm font-semibold text-black">
               Nombre Completo
@@ -107,7 +104,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Contraseña */}
           <div>
             <label htmlFor="password" className="text-sm font-semibold text-black">
               Contraseña
@@ -115,7 +111,7 @@ export default function LoginPage() {
             <div className="relative mb-1">
               <input
                 id="password"
-                type={showPassword ? 'text' : 'password'} // 👁 alterna
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Ingrese su contraseña"
@@ -132,7 +128,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Botón */}
           <button
             type="submit"
             disabled={isLoading}
