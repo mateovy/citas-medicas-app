@@ -3,8 +3,13 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
 import {
   Calendar,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  List,
   UserCheck,
   Clock,
   Plus,
@@ -255,7 +260,39 @@ export default function DashboardPage() {
         </div>
       </header>
       <main className="max-w-7xl mx-auto py-8 px-6">
-        {/* Barra de tabs + botón de estadísticas (mismo estilo, alineado a la derecha) */}
+        {/* Botón Agendar cita */}
+        <div className="flex justify-end mb-6">
+          <Link
+            href="/dashboard/agendar"
+            className="flex items-center gap-2 py-1 px-4 bg-black text-white font-semibold rounded-lg shadow-md hover:bg-gray-800 transition-colors"
+          >
+            <Plus size={20} />
+            Agendar cita
+          </Link>
+        </div>
+
+        {/* Tarjetas de estadísticas pequeñas */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <StatCard
+            title="Citas programadas"
+            value={proximasCitas.length}
+            icon={Calendar}
+          />
+          <StatCard
+            title="Citas completadas"
+            value={citas.filter((c) => c.estado === "Asistida").length}
+            icon={UserCheck}
+            color="green"
+          />
+          <StatCard
+            title="Total de citas"
+            value={citas.length}
+            icon={Clock}
+            color="gray"
+          />
+        </div>
+
+        {/* Barra de tabs + botón de estadísticas (misma apariencia, estadísticas a la derecha) */}
         <div className="flex justify-between items-center mb-6">
           {/* Tabs de Próximas e Historial */}
           <div className="flex items-center rounded-md border border-gray-200 bg-[#ECECEE] w-auto md:w-[360px]">
@@ -281,22 +318,23 @@ export default function DashboardPage() {
             </button>
           </div>
 
-          {/* Botón Mis Estadísticas con mismo estilo */}
+          {/* Botón Mis Estadísticas (a la derecha, mismo color/estilo visual) */}
           <button
-            onClick={() => router.push("/dashboard/estadisticas")}
+            onClick={() => setActiveTab("estadisticas")}
             className={`py-2 px-4 text-sm font-medium rounded-xl border border-gray-200 transition-colors
-      ${
-        activeTab === "estadisticas"
-          ? "bg-white text-gray-800 shadow-sm"
-          : "bg-[#ECECEE] text-gray-500 hover:bg-gray-100"
-      }
-    `}
+        ${
+          activeTab === "estadisticas"
+            ? "bg-white text-gray-800 shadow-sm"
+            : "bg-[#ECECEE] text-gray-500 hover:bg-gray-100"
+        }`}
           >
-            Mis Estadísticas
+            Mis estadísticas
           </button>
         </div>
 
+        {/* Contenido principal: Próximas / Historial / Estadísticas */}
         <div className="space-y-4">
+          {/* Próximas citas */}
           {activeTab === "proximas" &&
             (proximasCitas.length > 0 ? (
               proximasCitas.map((cita) => (
@@ -313,6 +351,7 @@ export default function DashboardPage() {
               </div>
             ))}
 
+          {/* Historial */}
           {activeTab === "historial" &&
             (historialCitas.length > 0 ? (
               historialCitas.map((cita) => (
@@ -325,8 +364,153 @@ export default function DashboardPage() {
                 </p>
               </div>
             ))}
+
+          {/* Estadísticas (con gráfico circular y colores) */}
+          {activeTab === "estadisticas" && (
+            <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
+              {citas.length > 0 ? (
+                <>
+                  <h2 className="text-xl font-semibold text-gray-800 mb-6">
+                    Tus estadísticas
+                  </h2>
+
+                  {(() => {
+                    // Excluir las programadas
+                    const citasFiltradas = citas.filter(
+                      (c) => c.estado !== "Programada"
+                    );
+
+                    const totalFiltradas = citasFiltradas.length;
+
+                    const asistidas = citasFiltradas.filter(
+                      (c) => c.estado === "Asistida"
+                    ).length;
+                    const canceladas = citasFiltradas.filter(
+                      (c) => c.estado === "Cancelada"
+                    ).length;
+                    const noAsistidas = citasFiltradas.filter(
+                      (c) => c.estado === "No Asistida"
+                    ).length;
+
+                    const data = [
+                      {
+                        name: "Citas Asistidas",
+                        value: asistidas,
+                        color: "#00FF8C", // verde neón
+                        icon: (
+                          <CheckCircle
+                            className="text-[#00FF8C] inline drop-shadow-sm"
+                            size={20}
+                          />
+                        ),
+                      },
+                      {
+                        name: "Citas Canceladas",
+                        value: canceladas,
+                        color: "#FFD700", // amarillo neón
+                        icon: (
+                          <AlertCircle
+                            className="text-[#FFD700] inline drop-shadow-sm"
+                            size={20}
+                          />
+                        ),
+                      },
+                      {
+                        name: "Citas No Asistidas",
+                        value: noAsistidas,
+                        color: "#FF3B3B", // rojo brillante
+                        icon: (
+                          <XCircle
+                            className="text-[#FF3B3B] inline drop-shadow-sm"
+                            size={20}
+                          />
+                        ),
+                      },
+                    ];
+
+                    const total =
+                      asistidas + canceladas + noAsistidas > 0
+                        ? asistidas + canceladas + noAsistidas
+                        : 1;
+
+                    return (
+                      <div className="flex flex-col items-center">
+                        <div className="w-full md:w-[400px] h-[250px] mb-6">
+                          <ResponsiveContainer>
+                            <PieChart>
+                              <Pie
+                                data={data}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={70}
+                                outerRadius={100}
+                                dataKey="value"
+                                isAnimationActive={false} // 👈 se muestra completa
+                                startAngle={90}
+                                endAngle={-270}
+                              >
+                                {data.map((entry, index) => (
+                                  <Cell
+                                    key={`cell-${index}`}
+                                    fill={entry.color}
+                                    stroke="#FFFFFF"
+                                    strokeWidth={2}
+                                  />
+                                ))}
+                              </Pie>
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+
+                        <h3 className="text-md font-semibold text-gray-800 mb-4">
+                          Total de citas analizadas ({totalFiltradas})
+                        </h3>
+
+                        <ul className="text-left space-y-2">
+                          {data.map((item, i) => {
+                            const porcentaje = Math.round(
+                              (item.value / total) * 100
+                            );
+                            return (
+                              <li
+                                key={i}
+                                className="flex items-center gap-2 text-gray-700 font-medium"
+                              >
+                                {item.icon}
+                                <span>
+                                  ({item.value}) {item.name}{" "}
+                                  <span className="text-gray-500">
+                                    ({porcentaje}%)
+                                  </span>
+                                </span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    );
+                  })()}
+                </>
+              ) : (
+                <div className="text-center py-16">
+                  <div className="flex justify-center mb-6">
+                    <div className="bg-[#ECECEE] p-6 rounded-full inline-flex">
+                      <Calendar size={48} className="text-gray-400" />
+                    </div>
+                  </div>
+                  <h2 className="text-xl font-semibold text-gray-700 mb-2">
+                    No hay estadísticas disponibles
+                  </h2>
+                  <p className="text-gray-500">
+                    Aún no hay datos para mostrar en esta sección.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </main>
+
       {citaParaCancelar && (
         <ConfirmationModal
           message="¿Seguro(a) que quiere cancelar su cita?"
