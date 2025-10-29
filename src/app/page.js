@@ -28,21 +28,24 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ documento, nombre, password }),
+        body: JSON.stringify({ documento, password }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        localStorage.setItem('usuario', JSON.stringify(data.user));
+        // ✅ Guarda el usuario completo en localStorage
+        localStorage.setItem('usuario', JSON.stringify(data));
         localStorage.setItem('inicioSesion', Date.now());
+
+        alert(`✅ Bienvenido, ${data.nombre}`);
         router.push('/dashboard');
       } else {
-        setError(data.message || 'Ocurrió un error');
+        setError(data.message || '❌ Credenciales incorrectas');
       }
     } catch (err) {
-      setError('No se pudo conectar al servidor. Intente de nuevo.');
-      console.error(err);
+      console.error('Error en login:', err);
+      setError('⚠️ No se pudo conectar al servidor. Intente de nuevo.');
     } finally {
       setIsLoading(false);
     }
@@ -52,11 +55,13 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-[#FFEFEF]">
       <div className="w-full max-w-md p-8 space-y-0 bg-white rounded-xl shadow-lg text-center">
         <div className="mx-auto flex items-center justify-center w-20 h-20 mb-6 bg-[#4848F7] rounded-full">
-          <Calendar className='w-[48px] h-[48px] text-white' />
+          <Calendar className="w-[48px] h-[48px] text-white" />
         </div>
 
-        <h2 className="text-base font-semibold text-gray-800 mb-2">Módulo de Exámenes de Diagnóstico</h2>
-        <p className="text-base font-medium font-[#Inter] text-[#808080] pb-5">
+        <h2 className="text-base font-semibold text-gray-800 mb-2">
+          Módulo de Exámenes de Diagnóstico
+        </h2>
+        <p className="text-base font-medium text-[#808080] pb-5">
           Ingrese sus datos para acceder al sistema de citas de diagnóstico
         </p>
 
