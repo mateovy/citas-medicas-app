@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 📅 Citas Médicas App
 
-## Getting Started
+Aplicación web para la gestión de citas de exámenes de diagnóstico, desarrollada con **Next.js + Supabase**.  
+Permite agendar, visualizar y cancelar citas médicas con almacenamiento persistente en la nube.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 🚀 Requisitos previos
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Antes de ejecutar el proyecto, asegúrate de tener instalado:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- **Node.js v18 o superior**
+- **npm** o **yarn**
+- Acceso a la base de datos Supabase configurada con las tablas `usuarios` y `citas`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## ⚙️ Instalación y configuración
 
-To learn more about Next.js, take a look at the following resources:
+1. Clonar el repositorio y acceder al proyecto:
+   ```bash
+   git clone https://github.com/usuario/citas-medicas-app.git
+   cd citas-medicas-app
+2. Instalar dependencias:
+   npm install
+   npm install @supabase/supabase-js
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3.Ejecutar el servidor de desarrollo:
+   npm run dev
+   
+4. Abrir en el navegador:
+   http://localhost:3000
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
