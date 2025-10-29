@@ -23,6 +23,7 @@ Antes de ejecutar el proyecto, asegúrate de tener instalado:
    cd citas-medicas-app
 2. Instalar dependencias:
    npm install
+   
    npm install @supabase/supabase-js
 
 3.Ejecutar el servidor de desarrollo:
