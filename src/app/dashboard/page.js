@@ -138,7 +138,7 @@ export default function DashboardPage() {
     }, 1000);
 
     return () => clearInterval(intervalId);
-  }, [router, handleCerrarSesion]);
+  }, [router, handleCerrarSesion, SESSION_TIMEOUT_MS]);
 
   const handleConfirmCancel = async () => {
     if (!citaParaCancelar) return;
