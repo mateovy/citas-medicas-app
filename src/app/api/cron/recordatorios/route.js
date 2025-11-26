@@ -14,7 +14,7 @@ function fechaHoraToTimestamp(fecha, hora) {
 export async function GET() {
   try {
     // Hora actual
-    const ahora = new Date().getTime();
+    const ahora = Date.now();
     const en24h = ahora + 24 * 60 * 60 * 1000;
 
     // Obtener citas

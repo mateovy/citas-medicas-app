@@ -1,30 +1,34 @@
-'use client';
+"use client";
 
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { ChevronDown } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function AgendarCitaPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const editId = searchParams.get('edit');
+  const editId = searchParams.get("edit");
   const isEditMode = !!editId;
 
   const [formData, setFormData] = useState({
     fecha: null,
-    hora: '',
-    especialidad: '',
-    doctor: '',
-    ubicacion: '',
+    hora: "",
+    especialidad: "",
+    doctor: "",
+    ubicacion: "",
   });
 
   const [appointmentData, setAppointmentData] = useState(null);
   const [availableFields, setAvailableFields] = useState({
     doctores: [],
-    ubicaciones: ['Consultorio 101', 'Consultorio 102', 'Consultorio 201', 'Consultorio 202'],
-    horas: ['06:00', '08:00', '10:00', '14:00', '16:00'],
+    ubicaciones: [
+      "Consultorio 101",
+      "Consultorio 102",
+      "Consultorio 201",
+      "Consultorio 202",
+    ],
+    horas: ["06:00", "08:00", "10:00", "14:00", "16:00"],
   });
 
   const tomorrow = new Date();
@@ -33,7 +37,7 @@ export default function AgendarCitaPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch('/api/appointment-data');
+        const res = await fetch("/api/appointment-data");
         const data = await res.json();
         setAppointmentData(data);
 
@@ -57,7 +61,7 @@ export default function AgendarCitaPage() {
           }
         }
       } catch (err) {
-        console.error('Error al cargar datos:', err);
+        console.error("Error al cargar datos:", err);
       }
     };
 
@@ -68,7 +72,7 @@ export default function AgendarCitaPage() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    if (name === 'especialidad') {
+    if (name === "especialidad") {
       setAvailableFields((prev) => ({
         ...prev,
         doctores: appointmentData[value] || [],
@@ -76,15 +80,16 @@ export default function AgendarCitaPage() {
     }
   };
 
-  const handleDateChange = (date) => setFormData((prev) => ({ ...prev, fecha: date }));
+  const handleDateChange = (date) =>
+    setFormData((prev) => ({ ...prev, fecha: date }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const usuario = JSON.parse(localStorage.getItem('usuario'));
-    if (!usuario || !usuario.id) {
-      alert('Inicia sesión nuevamente.');
-      router.push('/');
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+    if (!usuario?.id) {
+      alert("Inicia sesión nuevamente.");
+      router.push("/");
       return;
     }
 
@@ -92,32 +97,40 @@ export default function AgendarCitaPage() {
       usuario_id: usuario.id,
       especialidad: formData.especialidad,
       doctor: formData.doctor,
-      fecha: formData.fecha.toISOString().split('T')[0],
+      fecha: formData.fecha.toISOString().split("T")[0],
       hora: formData.hora,
       ubicacion: formData.ubicacion,
-      estado: 'Programada',
+      estado: "Programada",
     };
 
-    const method = isEditMode ? 'PATCH' : 'POST';
-    const url = isEditMode ? `/api/citas?id=${editId}` : '/api/citas';
+    const method = isEditMode ? "PATCH" : "POST";
+    const url = isEditMode ? `/api/citas?id=${editId}` : "/api/citas";
 
     try {
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(citaPayload),
       });
-      if (!res.ok) throw new Error('Error al guardar la cita.');
-      alert(isEditMode ? 'Cita actualizada correctamente.' : 'Cita agendada con éxito.');
-      router.push('/dashboard');
+      if (!res.ok) throw new Error("Error al guardar la cita.");
+      alert(
+        isEditMode
+          ? "Cita actualizada correctamente."
+          : "Cita agendada con éxito."
+      );
+      router.push("/dashboard");
     } catch (error) {
       console.error(error);
-      alert('Error al guardar la cita.');
+      alert("Error al guardar la cita.");
     }
   };
 
   const isFormValid =
-    formData.fecha && formData.hora && formData.especialidad && formData.doctor && formData.ubicacion;
+    formData.fecha &&
+    formData.hora &&
+    formData.especialidad &&
+    formData.doctor &&
+    formData.ubicacion;
 
   const isWeekday = (date) => {
     const day = date.getDay();
@@ -128,12 +141,16 @@ export default function AgendarCitaPage() {
     <div className="flex items-center justify-center min-h-screen bg-gray-900 bg-opacity-75">
       <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
         <h2 className="text-base font-semibold">
-          {isEditMode ? 'Editar Cita' : 'Agendar Nueva Cita'}
+          {isEditMode ? "Editar Cita" : "Agendar Nueva Cita"}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          {/* Campo Especialidad */}
           <div>
-            <label className="text-sm font-semibold">Especialidad</label>
+            <label htmlFor="especialidad" className="text-sm font-semibold">
+              Especialidad
+            </label>
             <select
+              id="especialidad"
               name="especialidad"
               value={formData.especialidad}
               onChange={handleChange}
@@ -150,9 +167,13 @@ export default function AgendarCitaPage() {
             </select>
           </div>
 
+          {/* Campo Doctor */}
           <div>
-            <label className="text-sm font-semibold">Doctor</label>
+            <label htmlFor="doctor" className="text-sm font-semibold">
+              Doctor
+            </label>
             <select
+              id="doctor"
               name="doctor"
               value={formData.doctor}
               onChange={handleChange}
@@ -170,9 +191,13 @@ export default function AgendarCitaPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
+            {/* Campo Fecha */}
             <div>
-              <label className="text-sm font-semibold">Fecha</label>
+              <label htmlFor="fecha" className="text-sm font-semibold">
+                Fecha
+              </label>
               <DatePicker
+                id="fecha"
                 selected={formData.fecha}
                 onChange={handleDateChange}
                 filterDate={isWeekday}
@@ -183,9 +208,14 @@ export default function AgendarCitaPage() {
                 required
               />
             </div>
+
+            {/* Campo Hora */}
             <div>
-              <label className="text-sm font-semibold">Hora</label>
+              <label htmlFor="hora" className="text-sm font-semibold">
+                Hora
+              </label>
               <select
+                id="hora"
                 name="hora"
                 value={formData.hora}
                 onChange={handleChange}
@@ -202,9 +232,13 @@ export default function AgendarCitaPage() {
             </div>
           </div>
 
+          {/* Campo Ubicación */}
           <div>
-            <label className="text-sm font-semibold">Ubicación</label>
+            <label htmlFor="ubicacion" className="text-sm font-semibold">
+              Ubicación
+            </label>
             <select
+              id="ubicacion"
               name="ubicacion"
               value={formData.ubicacion}
               onChange={handleChange}
@@ -221,6 +255,7 @@ export default function AgendarCitaPage() {
             </select>
           </div>
 
+          {/* Botones */}
           <div className="flex gap-4 pt-4">
             <button
               type="button"
@@ -234,7 +269,7 @@ export default function AgendarCitaPage() {
               disabled={!isFormValid}
               className="flex-1 py-2 px-4 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-[#808080] hover:bg-black disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {isEditMode ? 'Guardar Cambios' : 'Agendar Cita'}
+              {isEditMode ? "Guardar Cambios" : "Agendar Cita"}
             </button>
           </div>
         </form>
